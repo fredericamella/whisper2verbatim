@@ -8,6 +8,10 @@ Unlike transcription tools, it focuses on the post-processing stage: making tran
 
 ---
 
+## Live demo
+
+https://www.01form.com/whisper2verbatim/
+
 ## Context
 
 This tool was created as part of a Master’s degree research project.
