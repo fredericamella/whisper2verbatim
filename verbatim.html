@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verbatim</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6f5f1;
+    --bg2: #eceae4;
+    --card: #ffffff;
+    --border: #d8d5cd;
+    --text: #1a1917;
+    --text2: #7c7a72;
+    --text3: #a5a29a;
+    --accent: #2d5be3;
+    --accent-hover: #3d6af0;
+    --accent-soft: rgba(45,91,227,.08);
+    --speaker1: #2d5be3;
+    --speaker2: #c0582e;
+    --speaker3: #1a8a5c;
+    --speaker4: #8b5cf6;
+    --success: #1a8a5c;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.03);
+    --shadow-lg: 0 4px 24px rgba(0,0,0,.06);
+    --font: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141413;
+      --bg2: #1e1e1c;
+      --card: #222220;
+      --border: #333330;
+      --text: #e8e6e1;
+      --text2: #918f88;
+      --text3: #5c5a55;
+      --accent: #5b8af5;
+      --accent-hover: #7aa2ff;
+      --accent-soft: rgba(91,138,245,.1);
+      --shadow: 0 1px 3px rgba(0,0,0,.2), 0 4px 12px rgba(0,0,0,.15);
+      --shadow-lg: 0 4px 24px rgba(0,0,0,.25);
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  /* ── Layout ── */
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 24px 60px;
+  }
+
+  /* ── Header ── */
+  header {
+    margin-bottom: 36px;
+  }
+  header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    margin-bottom: 6px;
+  }
+  header h1 span {
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  header p {
+    color: var(--text2);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  /* ── Steps indicator ── */
+  .steps {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+  .step-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: var(--bg2);
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text3);
+    transition: all .3s;
+  }
+  .step-pill.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .step-pill.done {
+    background: rgba(26,138,92,.08);
+    color: var(--success);
+  }
+  .step-num {
+    width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    background: var(--border);
+    color: var(--card);
+    font-size: 11px;
+    font-weight: 700;
+    transition: all .3s;
+  }
+  .step-pill.active .step-num { background: var(--accent); }
+  .step-pill.done .step-num { background: var(--success); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+    transition: opacity .3s, transform .3s;
+  }
+  .card.collapsed {
+    opacity: .5;
+    pointer-events: none;
+    transform: scale(.98);
+  }
+  .card h2 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card h2 .icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  /* ── Dropzone ── */
+  .dropzone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .dropzone::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--accent-soft);
+    opacity: 0;
+    transition: opacity .25s;
+  }
+  .dropzone:hover::before,
+  .dropzone.active::before { opacity: 1; }
+  .dropzone:hover,
+  .dropzone.active {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .dropzone > * { position: relative; }
+  .drop-icon {
+    width: 52px; height: 52px;
+    margin: 0 auto 14px;
+    background: var(--bg2);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    transition: transform .25s;
+  }
+  .dropzone:hover .drop-icon { transform: scale(1.08); }
+  .drop-label {
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .drop-label strong { color: var(--accent); }
+  .drop-hint { font-size: 13px; color: var(--text3); }
+  .drop-filename {
+    display: none;
+    margin-top: 12px;
+    padding: 8px 16px;
+    background: rgba(26,138,92,.08);
+    color: var(--success);
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .drop-filename.visible { display: inline-block; }
+  input[type="file"] { display: none; }
+
+  /* ── Speaker rows ── */
+  .speaker-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    animation: fadeIn .3s ease both;
+  }
+  .speaker-row:nth-child(1) { animation-delay: .05s; }
+  .speaker-row:nth-child(2) { animation-delay: .1s; }
+  .speaker-row:nth-child(3) { animation-delay: .15s; }
+  .speaker-row:nth-child(4) { animation-delay: .2s; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .speaker-badge {
+    min-width: 130px;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: white;
+  }
+  .speaker-row:nth-child(4n+1) .speaker-badge { background: var(--speaker1); }
+  .speaker-row:nth-child(4n+2) .speaker-badge { background: var(--speaker2); }
+  .speaker-row:nth-child(4n+3) .speaker-badge { background: var(--speaker3); }
+  .speaker-row:nth-child(4n+4) .speaker-badge { background: var(--speaker4); }
+
+  .speaker-arrow {
+    color: var(--text3);
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .speaker-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font);
+    font-size: 14px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .speaker-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .bold-toggle {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text3);
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .bold-toggle:hover {
+    border-color: var(--text2);
+  }
+  .bold-toggle.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  /* ── Buttons ── */
+  .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 22px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 1px 4px rgba(45,91,227,.25);
+  }
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(45,91,227,.3);
+  }
+  .btn-primary:disabled {
+    opacity: .4;
+    cursor: default;
+    transform: none;
+    box-shadow: none;
+  }
+  .btn-secondary {
+    background: var(--bg2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover {
+    background: var(--border);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--accent);
+    padding: 10px 14px;
+  }
+  .btn-ghost:hover { background: var(--accent-soft); }
+
+  .spacer { flex: 1; }
+
+  /* ── Toggle switches ── */
+  .options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .option-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 16px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+  .option-label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .option-label strong {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .option-label span {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.4;
+  }
+  .toggle {
+    position: relative;
+    width: 48px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+  .toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .toggle-track {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: background .25s;
+  }
+  .toggle-track::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 22px;
+    height: 22px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,.15);
+    transition: transform .25s;
+  }
+  .toggle input:checked + .toggle-track {
+    background: var(--accent);
+  }
+  .toggle input:checked + .toggle-track::after {
+    transform: translateX(20px);
+  }
+
+  /* ── Stats ── */
+  .stats {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 14px;
+  }
+  .stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text2);
+  }
+  .stat-value {
+    font-weight: 700;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  /* ── Preview ── */
+  .preview-container {
+    position: relative;
+    margin-top: 14px;
+  }
+  .preview {
+    white-space: pre-wrap;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    max-height: 480px;
+    overflow-y: auto;
+    padding: 16px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .preview::-webkit-scrollbar { width: 6px; }
+  .preview::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+  .preview i {
+    font-style: italic;
+  }
+  .preview b {
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* ── Hidden state ── */
+  .hidden { display: none !important; }
+
+  /* ── Context form ── */
+  .context-field {
+    margin-bottom: 14px;
+  }
+  .context-field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+  .context-field input,
+  .context-field textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font);
+    font-size: 14px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .context-field input:focus,
+  .context-field textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .context-field textarea {
+    resize: vertical;
+    min-height: 60px;
+  }
+  .title-input {
+    font-size: 16px !important;
+    font-weight: 600;
+    text-align: center;
+    padding: 12px 16px !important;
+  }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    padding: 12px 24px;
+    background: var(--text);
+    color: var(--bg);
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    transition: transform .35s cubic-bezier(.175,.885,.32,1.275);
+    z-index: 100;
+    pointer-events: none;
+  }
+  .toast.visible {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── Footer ── */
+  .app-footer {
+    text-align: center;
+    padding: 24px 16px 32px;
+    font-size: 12px;
+    color: var(--text3);
+    letter-spacing: .01em;
+  }
+  .app-footer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .app-footer a:hover {
+    text-decoration: underline;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .container { padding: 24px 16px 40px; }
+    header h1 { font-size: 26px; }
+    .steps { flex-wrap: wrap; }
+    .speaker-badge { min-width: 90px; font-size: 11px; }
+    .speaker-input { font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1><span>Verbatim</span></h1>
+    <p>Glissez un fichier JSON de transcription, renommez les interlocuteurs, exportez le verbatim.</p>
+  </header>
+
+  <!-- Steps -->
+  <div class="steps">
+    <div class="step-pill active" id="step1">
+      <div class="step-num">1</div> Fichier
+    </div>
+    <div class="step-pill" id="step2">
+      <div class="step-num">2</div> Interlocuteurs
+    </div>
+    <div class="step-pill" id="step3">
+      <div class="step-num">3</div> Métadonnées
+    </div>
+    <div class="step-pill" id="step4">
+      <div class="step-num">4</div> Options
+    </div>
+    <div class="step-pill" id="step5">
+      <div class="step-num">5</div> Résultat
+    </div>
+  </div>
+
+  <!-- Card 1 : Fichier -->
+  <div class="card" id="card-file">
+    <h2><span class="icon">📄</span> Fichier de transcription</h2>
+    <div class="dropzone" id="dropzone">
+      <div class="drop-icon">⬆</div>
+      <div class="drop-label">Glissez un fichier JSON ou <strong>parcourez</strong></div>
+      <div class="drop-hint">Scriberr, Whisper, WhisperX, ou tout JSON avec un tableau de segments</div>
+      <div class="drop-filename" id="filename"></div>
+    </div>
+    <input type="file" id="fileinput" accept=".json">
+  </div>
+
+  <!-- Card 2 : Speakers -->
+  <div class="card collapsed" id="card-speakers">
+    <h2><span class="icon">👥</span> Interlocuteurs détectés</h2>
+    <div id="speakers-list"></div>
+  </div>
+
+  <!-- Card 3 : Métadonnées -->
+  <div class="card collapsed" id="card-meta">
+    <h2><span class="icon">📝</span> Titre et contexte</h2>
+
+    <div class="context-field">
+      <label>Titre du document</label>
+      <input type="text" id="meta-title" class="title-input" maxlength="200" placeholder="Ex : Entretien avec M. Dupont — 12 mars 2026">
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:20px 0;">
+
+    <h2 style="margin-top:0;"><span class="icon">📋</span> Contexte de l'entretien</h2>
+
+    <div class="context-field">
+      <label>Enquêteur :</label>
+      <input type="text" id="meta-enqueteur" maxlength="200">
+    </div>
+    <div class="context-field">
+      <label>Enquêté :</label>
+      <input type="text" id="meta-enquete" maxlength="200">
+    </div>
+    <div class="context-field">
+      <label>Date :</label>
+      <input type="text" id="meta-date" maxlength="200">
+    </div>
+    <div class="context-field">
+      <label>Lieu :</label>
+      <input type="text" id="meta-lieu" maxlength="200">
+    </div>
+    <div class="context-field">
+      <label>Durée :</label>
+      <input type="text" id="meta-duree" maxlength="200">
+    </div>
+    <div class="context-field">
+      <label>Conditions générales de l'échange :</label>
+      <textarea id="meta-conditions" maxlength="200" rows="2"></textarea>
+    </div>
+    <div class="context-field">
+      <label>Éléments de contexte ayant pu influencer le déroulement :</label>
+      <textarea id="meta-elements" maxlength="200" rows="2"></textarea>
+    </div>
+    <div class="context-field">
+      <label>Observations complémentaires :</label>
+      <textarea id="meta-observations" maxlength="200" rows="2"></textarea>
+    </div>
+  </div>
+
+  <!-- Card 4 : Options -->
+  <div class="card collapsed" id="card-options">
+    <h2><span class="icon">⚙️</span> Options</h2>
+    <div class="options-grid">
+      <div class="option-row">
+        <div class="option-label">
+          <strong>Timecodes</strong>
+          <span>Afficher les marqueurs temporels [0:00] devant chaque segment</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="opt-timecodes" checked>
+          <div class="toggle-track"></div>
+        </label>
+      </div>
+      <div class="option-row">
+        <div class="option-label">
+          <strong>Regrouper les paragraphes</strong>
+          <span>Fusionner les segments consécutifs d'un même interlocuteur en un seul paragraphe</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="opt-merge">
+          <div class="toggle-track"></div>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 5 : Result -->
+  <div class="card collapsed" id="card-result">
+    <h2><span class="icon">✍️</span> Verbatim généré</h2>
+    <div class="actions">
+      <button class="btn btn-primary" id="btn-generate">Générer</button>
+      <button class="btn btn-secondary hidden" id="btn-download-txt">⬇ .txt</button>
+      <button class="btn btn-secondary hidden" id="btn-download-rtf">⬇ .rtf</button>
+      <button class="btn btn-ghost hidden" id="btn-copy">Copier</button>
+      <div class="spacer"></div>
+      <button class="btn btn-ghost hidden" id="btn-reset">Nouveau fichier</button>
+    </div>
+    <div class="stats hidden" id="stats"></div>
+    <div class="preview-container hidden" id="preview-wrap">
+      <pre class="preview" id="preview"></pre>
+    </div>
+  </div>
+
+</div>
+
+<footer class="app-footer">
+  Verbatim, version 1.0 par Frédéric AMELLA — <a href="https://www.01form.com" target="_blank" rel="noopener">www.01form.com</a> — avril 2026
+</footer>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ─── Config ─── */
+const PAUSE_THRESHOLD = 1.2;
+const LONG_PAUSE_THRESHOLD = 2.5;
+
+/* ─── State ─── */
+let currentFileName = '';
+let segments = null;
+let speakers = [];
+let lastResult = '';
+let lastBoldMap = {};
+let lastMeta = {};
+
+/* ─── DOM ─── */
+const $ = s => document.getElementById(s);
+const dropzone = $('dropzone');
+const fileinput = $('fileinput');
+const filenameEl = $('filename');
+const speakersList = $('speakers-list');
+const btnGenerate = $('btn-generate');
+const btnDownloadTxt = $('btn-download-txt');
+const btnDownloadRtf = $('btn-download-rtf');
+const btnCopy = $('btn-copy');
+const btnReset = $('btn-reset');
+const preview = $('preview');
+const statsEl = $('stats');
+const previewWrap = $('preview-wrap');
+const toast = $('toast');
+
+/* ─── Processing functions ─── */
+
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+function speakerName(seg) {
+  return seg.speaker || seg.speaker_id || 'SPEAKER';
+}
+
+function cleanText(text) {
+  return (text || '').replace(/\s+/g, ' ').trim();
+}
+
+function loadSegments(data) {
+  if (Array.isArray(data)) return data;
+  if (data && data.segments) return data.segments;
+  if (data && data.transcript && data.transcript.segments) return data.transcript.segments;
+  throw new Error('Segments introuvables dans ce fichier JSON.');
+}
+
+function collectSpeakers(segs) {
+  const seen = new Set();
+  const result = [];
+  for (const seg of segs) {
+    const spk = speakerName(seg);
+    if (!seen.has(spk)) {
+      seen.add(spk);
+      result.push(spk);
+    }
+  }
+  return result;
+}
+
+function generateVerbatim(segs, mapping, opts) {
+  const showTimecodes = opts.timecodes;
+  const mergeParagraphs = opts.merge;
+  const lines = [];
+  let currentSpeaker = null;
+  let prevEnd = null;
+
+  function inlinePause(gap) {
+    if (gap >= PAUSE_THRESHOLD) {
+      return '[pause, ' + gap.toFixed(1).replace('.', ',') + ' s]';
+    }
+    return '';
+  }
+
+  function blockPause(gap) {
+    if (gap >= PAUSE_THRESHOLD) {
+      return '\n[pause, ' + gap.toFixed(1).replace('.', ',') + ' s]\n\n';
+    }
+    return '';
+  }
+
+  /* ── Pre-scan: for each segment, know who speaks next ── */
+  const cleaned = [];
+  for (const seg of segs) {
+    const text = cleanText(seg.text);
+    if (!text) continue;
+    cleaned.push({
+      start: parseFloat(seg.start || 0),
+      end: parseFloat(seg.end || seg.start || 0),
+      text: text,
+      speaker: mapping[speakerName(seg)] || speakerName(seg)
+    });
+  }
+
+  if (mergeParagraphs) {
+    /* ── Mode regroupé ── */
+    let blockSpeaker = null;
+    let blockParts = [];
+    let blockStart = 0;
+
+    function flushBlock() {
+      if (!blockParts.length) return;
+      const prefix = showTimecodes ? '[' + formatTime(blockStart) + '] - ' : '';
+      lines.push('\n' + prefix + blockSpeaker + ' : ' + blockParts.join(' ') + '\n');
+    }
+
+    for (let i = 0; i < cleaned.length; i++) {
+      const seg = cleaned[i];
+      const gap = (prevEnd !== null) ? seg.start - prevEnd : 0;
+      const sameSpeaker = (seg.speaker === blockSpeaker);
+
+      if (!sameSpeaker) {
+        /* Speaker change */
+        if (prevEnd !== null) {
+          /* If there's a pause between speakers, append inline to previous block then add block pause */
+          flushBlock();
+          const p = blockPause(gap);
+          if (p) lines.push(p);
+        }
+        blockSpeaker = seg.speaker;
+        blockParts = [seg.text];
+        blockStart = seg.start;
+      } else {
+        /* Same speaker — insert pause inline */
+        const p = inlinePause(gap);
+        if (p) {
+          /* Append pause marker to the last part, then add a period-like join */
+          blockParts.push(p + ' ' + seg.text);
+        } else {
+          blockParts.push(seg.text);
+        }
+      }
+
+      prevEnd = seg.end;
+    }
+    flushBlock();
+
+  } else {
+    /* ── Mode segment par segment ── */
+    for (let i = 0; i < cleaned.length; i++) {
+      const seg = cleaned[i];
+      const gap = (prevEnd !== null) ? seg.start - prevEnd : 0;
+      const isNewSpeaker = (seg.speaker !== currentSpeaker);
+
+      if (isNewSpeaker) {
+        /* Speaker change — show block pause if any */
+        if (prevEnd !== null) {
+          const p = blockPause(gap);
+          if (p) lines.push(p);
+        }
+        currentSpeaker = seg.speaker;
+        const prefix = showTimecodes ? '[' + formatTime(seg.start) + '] - ' : '';
+        lines.push('\n' + prefix + seg.speaker + ' : ' + seg.text + '\n');
+      } else {
+        /* Same speaker */
+        const p = inlinePause(gap);
+        const prefix = showTimecodes ? '[' + formatTime(seg.start) + '] ' : '';
+        if (p) {
+          /* Append inline pause to end of previous line, then new line */
+          const lastIdx = lines.length - 1;
+          if (lastIdx >= 0) {
+            lines[lastIdx] = lines[lastIdx].replace(/\n$/, '') + ' ' + p + '\n';
+          }
+          lines.push(prefix + seg.text + '\n');
+        } else {
+          lines.push(prefix + seg.text + '\n');
+        }
+      }
+
+      prevEnd = seg.end;
+    }
+  }
+
+  return lines.join('');
+}
+
+/* ─── UI helpers ─── */
+
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 2200);
+}
+
+function setStep(n) {
+  for (let i = 1; i <= 5; i++) {
+    const pill = $('step' + i);
+    pill.classList.remove('active', 'done');
+    if (i < n) pill.classList.add('done');
+    else if (i === n) pill.classList.add('active');
+  }
+}
+
+/* ─── Dropzone ─── */
+
+dropzone.addEventListener('click', () => fileinput.click());
+dropzone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropzone.classList.add('active');
+});
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('active'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('active');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileinput.addEventListener('change', e => {
+  if (e.target.files.length) handleFile(e.target.files[0]);
+});
+
+function handleFile(file) {
+  currentFileName = file.name;
+  filenameEl.textContent = '\u2705 ' + file.name;
+  filenameEl.classList.add('visible');
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      segments = loadSegments(data);
+      speakers = collectSpeakers(segments);
+      buildSpeakerRows();
+    } catch (err) {
+      showToast('Erreur : ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function buildSpeakerRows() {
+  speakersList.innerHTML = '';
+  speakers.forEach(spk => {
+    const row = document.createElement('div');
+    row.className = 'speaker-row';
+    row.innerHTML =
+      '<div class="speaker-badge" title="' + spk + '">' + spk + '</div>' +
+      '<span class="speaker-arrow">\u2192</span>' +
+      '<input class="speaker-input" type="text" data-original="' + spk + '" value="' + spk + '" placeholder="Prénom Nom">' +
+      '<button class="bold-toggle" data-speaker="' + spk + '" title="Gras" type="button">En gras</button>';
+    speakersList.appendChild(row);
+  });
+
+  /* Toggle bold on click */
+  speakersList.querySelectorAll('.bold-toggle').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      btn.classList.toggle('active');
+    });
+  });
+
+  $('card-speakers').classList.remove('collapsed');
+  $('card-meta').classList.remove('collapsed');
+  $('card-options').classList.remove('collapsed');
+  $('card-result').classList.remove('collapsed');
+  previewWrap.classList.add('hidden');
+  btnDownloadTxt.classList.add('hidden');
+  btnDownloadRtf.classList.add('hidden');
+  btnCopy.classList.add('hidden');
+  btnReset.classList.add('hidden');
+  statsEl.classList.add('hidden');
+  setStep(2);
+}
+
+/* ─── Generate ─── */
+
+btnGenerate.addEventListener('click', () => {
+  if (!segments) return;
+
+  const mapping = {};
+  const boldMap = {};
+  speakersList.querySelectorAll('.speaker-row').forEach(row => {
+    const inp = row.querySelector('.speaker-input');
+    const btn = row.querySelector('.bold-toggle');
+    const original = inp.dataset.original;
+    const name = inp.value.trim() || original;
+    mapping[original] = name;
+    boldMap[name] = btn.classList.contains('active');
+  });
+
+  const verbatimBody = generateVerbatim(segments, mapping, {
+    timecodes: $('opt-timecodes').checked,
+    merge: $('opt-merge').checked
+  });
+
+  /* ── Build full document with metadata ── */
+  const meta = {
+    title: $('meta-title').value.trim(),
+    fields: [
+      { label: 'Enquêteur :', value: $('meta-enqueteur').value.trim() },
+      { label: 'Enquêté :', value: $('meta-enquete').value.trim() },
+      { label: 'Date :', value: $('meta-date').value.trim() },
+      { label: 'Lieu :', value: $('meta-lieu').value.trim() },
+      { label: 'Durée :', value: $('meta-duree').value.trim() },
+      { label: 'Conditions générales de l\'échange :', value: $('meta-conditions').value.trim() },
+      { label: 'Éléments de contexte ayant pu influencer le déroulement :', value: $('meta-elements').value.trim() },
+      { label: 'Observations complémentaires :', value: $('meta-observations').value.trim() }
+    ]
+  };
+
+  let doc = '';
+  if (meta.title) {
+    doc += meta.title + '\n\n';
+  }
+  const hasContext = meta.fields.some(f => f.value);
+  if (hasContext) {
+    meta.fields.forEach(f => {
+      if (f.value) {
+        doc += f.label + ' ' + f.value + '\n\n';
+      }
+    });
+  }
+  doc += '\n[début de la retranscription]\n';
+  doc += verbatimBody;
+  doc += '\n[fin de la retranscription]\n';
+
+  lastResult = doc;
+
+  /* Store for downloads */
+  lastBoldMap = boldMap;
+  lastMeta = meta;
+
+  /* ── Render preview ── */
+  function escapeHtml(t) {
+    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  const allNames = Object.keys(boldMap);
+  /* Collect context labels for bold matching */
+  const contextLabels = meta.fields.map(f => f.label);
+
+  const resultLines = lastResult.split('\n');
+  let currentBold = false;
+  const htmlLines = resultLines.map(function(line, idx) {
+    const trimmed = line.trim();
+
+    /* Title line — bold, centered */
+    if (meta.title && trimmed === meta.title) {
+      return '<span style="display:block;text-align:center"><b>' + escapeHtml(trimmed) + '</b></span>';
+    }
+
+    /* Start/end markers */
+    if (trimmed === '[début de la retranscription]' || trimmed === '[fin de la retranscription]') {
+      currentBold = false;
+      return '<i>' + escapeHtml(trimmed) + '</i>';
+    }
+
+    /* Context field labels in bold */
+    for (const lbl of contextLabels) {
+      if (trimmed.startsWith(lbl)) {
+        return '<b>' + escapeHtml(lbl) + '</b>' + escapeHtml(trimmed.slice(lbl.length));
+      }
+    }
+
+    /* Detect speaker line → update bold context */
+    for (const name of allNames) {
+      if (trimmed.startsWith(name + ' : ') || trimmed.includes('- ' + name + ' : ')) {
+        currentBold = boldMap[name];
+        break;
+      }
+    }
+
+    /* Escape then apply inline italic to pause markers */
+    let escaped = escapeHtml(line);
+    escaped = escaped.replace(/\[pause,[^\]]*\]/g, function(m) {
+      return '<i>' + m + '</i>';
+    });
+
+    /* Don't bold standalone pause-only lines (between speakers) */
+    const isPauseOnly = /^\[pause,/.test(trimmed);
+    return (currentBold && trimmed && !isPauseOnly) ? '<b>' + escaped + '</b>' : escaped;
+  });
+
+  preview.innerHTML = htmlLines.join('\n');
+
+  previewWrap.classList.remove('hidden');
+  btnDownloadTxt.classList.remove('hidden');
+  btnDownloadRtf.classList.remove('hidden');
+  btnCopy.classList.remove('hidden');
+  btnReset.classList.remove('hidden');
+
+  const lineCount = lastResult.split('\n').filter(l => l.trim()).length;
+  const wordCount = lastResult.split(/\s+/).filter(w => w).length;
+  const duration = segments.length ? parseFloat(segments[segments.length - 1].end || 0) : 0;
+  statsEl.innerHTML =
+    '<div class="stat"><span class="stat-value">' + lineCount + '</span> lignes</div>' +
+    '<div class="stat"><span class="stat-value">' + wordCount + '</span> mots</div>' +
+    '<div class="stat"><span class="stat-value">' + formatTime(duration) + '</span> durée</div>' +
+    '<div class="stat"><span class="stat-value">' + speakers.length + '</span> interlocuteurs</div>';
+  statsEl.classList.remove('hidden');
+
+  setStep(5);
+  showToast('Verbatim généré');
+});
+
+/* ─── Download TXT ─── */
+
+btnDownloadTxt.addEventListener('click', () => {
+  const blob = new Blob([lastResult], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = currentFileName.replace(/\.json$/i, '') + '.verbatim.txt';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Fichier .txt téléchargé');
+});
+
+/* ─── Download RTF ─── */
+
+function generateRtf(text, boldMap, meta) {
+
+  /* Escape RTF special chars and encode unicode */
+  function rtfEscape(s) {
+    let out = '';
+    for (let i = 0; i < s.length; i++) {
+      const c = s.charCodeAt(i);
+      const ch = s[i];
+      if (ch === '\\') out += '\\\\';
+      else if (ch === '{') out += '\\{';
+      else if (ch === '}') out += '\\}';
+      else if (c > 127) out += '\\u' + c + '?';
+      else out += ch;
+    }
+    return out;
+  }
+
+  /* Escape a line, wrapping [pause, X s] markers in italic */
+  function rtfLine(str) {
+    const parts = str.split(/(\[pause,[^\]]*\])/g);
+    let out = '';
+    for (const part of parts) {
+      if (/^\[pause,/.test(part)) {
+        out += '{\\i ' + rtfEscape(part) + '}';
+      } else {
+        out += rtfEscape(part);
+      }
+    }
+    return out;
+  }
+
+  const speakerNames = Object.keys(boldMap);
+  const contextLabels = meta.fields ? meta.fields.map(function(f) { return f.label; }) : [];
+  const lines = text.split('\n');
+  let rtfBody = '';
+  let currentBold = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const trimmed = lines[i].trim();
+
+    if (!trimmed) {
+      rtfBody += '\\par\n';
+      continue;
+    }
+
+    /* Title — bold, centered */
+    if (meta.title && trimmed === meta.title) {
+      rtfBody += '\\qc{\\b\\fs28 ' + rtfEscape(trimmed) + '}\\par\n\\ql\n';
+      continue;
+    }
+
+    /* Start/end markers — italic */
+    if (trimmed === '[d\u00e9but de la retranscription]' || trimmed === '[fin de la retranscription]') {
+      rtfBody += '{\\i ' + rtfEscape(trimmed) + '}\\par\n';
+      currentBold = false;
+      continue;
+    }
+
+    /* Context field labels — label bold, value normal */
+    let isContext = false;
+    for (const lbl of contextLabels) {
+      if (trimmed.startsWith(lbl)) {
+        const rest = trimmed.slice(lbl.length);
+        rtfBody += '{\\b ' + rtfEscape(lbl) + '}' + rtfEscape(rest) + '\\par\n';
+        isContext = true;
+        break;
+      }
+    }
+    if (isContext) continue;
+
+    /* Detect speaker line → update bold context */
+    for (const name of speakerNames) {
+      if (trimmed.startsWith(name + ' : ') || trimmed.includes('- ' + name + ' : ')) {
+        currentBold = boldMap[name];
+        break;
+      }
+    }
+
+    /* Render line with inline italic pauses and optional bold */
+    const rendered = rtfLine(trimmed);
+    const isPauseOnly = /^\[pause,/.test(trimmed);
+    if (currentBold && !isPauseOnly) {
+      rtfBody += '{\\b ' + rendered + '}\\par\n';
+    } else {
+      rtfBody += rendered + '\\par\n';
+    }
+  }
+
+  return '{\\rtf1\\ansi\\ansicpg1252\\deff0\n' +
+    '{\\fonttbl{\\f0\\fswiss\\fcharset0 Helvetica;}}\n' +
+    '\\f0\\fs24\n' +
+    rtfBody +
+    '}';
+}
+
+btnDownloadRtf.addEventListener('click', () => {
+  const rtfContent = generateRtf(lastResult, lastBoldMap, lastMeta);
+  const blob = new Blob([rtfContent], { type: 'application/rtf' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = currentFileName.replace(/\.json$/i, '') + '.verbatim.rtf';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Fichier .rtf téléchargé');
+});
+
+/* ─── Copy ─── */
+
+btnCopy.addEventListener('click', () => {
+  navigator.clipboard.writeText(lastResult).then(() => showToast('Copié dans le presse-papier'));
+});
+
+/* ─── Reset ─── */
+
+btnReset.addEventListener('click', () => {
+  segments = null;
+  speakers = [];
+  lastResult = '';
+  lastBoldMap = {};
+  lastMeta = {};
+  currentFileName = '';
+  filenameEl.classList.remove('visible');
+  fileinput.value = '';
+  speakersList.innerHTML = '';
+  preview.textContent = '';
+  /* Clear metadata fields */
+  $('meta-title').value = '';
+  $('meta-enqueteur').value = '';
+  $('meta-enquete').value = '';
+  $('meta-date').value = '';
+  $('meta-lieu').value = '';
+  $('meta-duree').value = '';
+  $('meta-conditions').value = '';
+  $('meta-elements').value = '';
+  $('meta-observations').value = '';
+  previewWrap.classList.add('hidden');
+  btnDownloadTxt.classList.add('hidden');
+  btnDownloadRtf.classList.add('hidden');
+  btnCopy.classList.add('hidden');
+  btnReset.classList.add('hidden');
+  statsEl.classList.add('hidden');
+  $('card-speakers').classList.add('collapsed');
+  $('card-meta').classList.add('collapsed');
+  $('card-options').classList.add('collapsed');
+  $('card-result').classList.add('collapsed');
+  setStep(1);
+});
+</script>
+</body>
+</html>
