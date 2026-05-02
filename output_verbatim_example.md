@@ -1,4 +1,4 @@
-[00:00] - Enquêteur : bonjour euh merci d'être là
+**[00:00] - Enquêteur : bonjour euh merci d'être là**
 
 [pause, 1,2 s]
 
